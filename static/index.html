@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Quiz Bot — Mini App</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Background Glow Blobs -->
+    <div class="glow-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- App Shell -->
+    <div class="app-container">
+        <!-- Top App Bar -->
+        <header class="app-header">
+            <div class="user-badge" id="header-user-badge">
+                <img src="/static/images/default-avatar.png" alt="Avatar" class="avatar" id="header-avatar">
+                <div class="user-meta">
+                    <span class="user-name" id="header-username">Developer Mode</span>
+                    <span class="user-level"><i class="fa-solid fa-medal"></i> Intellektual</span>
+                </div>
+            </div>
+            <div class="balance-badge" id="header-balance-badge">
+                <span class="balance-lbl">Balans</span>
+                <span class="balance-val"><span id="header-balance">0</span> <small>so'm</small></span>
+            </div>
+        </header>
+
+        <!-- Main Content Area (SPA Pages) -->
+        <main class="app-content">
+            
+            <!-- PAGE 1: HOME -->
+            <section id="page-home" class="page-section active">
+                <div class="welcome-card">
+                    <div class="card-glow"></div>
+                    <div class="welcome-text">
+                        <h1>Xush kelibsiz!</h1>
+                        <p>O'z bilimingizni sinab ko'ring va har bir to'g'ri javob uchun haqiqiy pul ishlang! Boshlashga tayyormisiz?</p>
+                        <button class="btn-primary-glow" onclick="switchTab('quizzes')">
+                            O'yinni Boshlash <i class="fa-solid fa-circle-play"></i>
+                        </button>
+                    </div>
+                    <div class="welcome-illus">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                </div>
+
+                <!-- Live Metrics -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-bolt text-cyan"></i>
+                        <span class="stat-num" id="home-correct-cnt">0</span>
+                        <span class="stat-lbl">To'g'ri javoblar</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-wallet text-gold"></i>
+                        <span class="stat-num" id="home-wallet-bal">0</span>
+                        <span class="stat-lbl">Joriy balans</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-award text-purple"></i>
+                        <span class="stat-num" id="home-total-earned">0</span>
+                        <span class="stat-lbl">Jami topilgan</span>
+                    </div>
+                </div>
+
+                <!-- Learning Progress Banner -->
+                <div class="progress-section-card">
+                    <h3>Viktorina Progressi</h3>
+                    <div class="progress-bar-container">
+                        <div class="progress-fill" id="home-progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text-row">
+                        <span id="home-progress-percentage">0% Bajarildi</span>
+                        <span id="home-progress-ratio">0/50 Savol</span>
+                    </div>
+                </div>
+
+                <!-- Educational Grid -->
+                <div class="section-title-container">
+                    <h2>Kunning Mavzulari</h2>
+                </div>
+                <div class="edu-grid">
+                    <div class="edu-card gradient-blue">
+                        <div class="edu-content">
+                            <span class="edu-tag">Haftalik tavsiya</span>
+                            <h3>Matematik tafakkurni rivojlantirish</h3>
+                            <p>Mantiqiy savollar va algebraik masalalar miyani faollashtiradi.</p>
+                        </div>
+                        <i class="fa-solid fa-compass-drafting edu-bg-icon"></i>
+                    </div>
+                    <div class="edu-card gradient-purple">
+                        <div class="edu-content">
+                            <span class="edu-tag">Oson til o'rganish</span>
+                            <h3>Ingliz tili so'z boyligi</h3>
+                            <p>Har kuni 10 tadan yangi so'z yodlab, bilimingizni viktorinada sinang.</p>
+                        </div>
+                        <i class="fa-solid fa-language edu-bg-icon"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 2: QUIZZES -->
+            <section id="page-quizzes" class="page-section">
+                <div class="page-header-title">
+                    <h2>Viktorina Fanlari</h2>
+                    <p>Fanni tanlang va testni boshlang. Har bir to'g'ri javob uchun +10 so'm!</p>
+                </div>
+
+                <!-- Quiz Cards Grid -->
+                <div class="quiz-grid" id="subjects-list-container">
+                    <!-- Loaded dynamically via JavaScript -->
+                    <div class="quiz-skeleton"></div>
+                    <div class="quiz-skeleton"></div>
+                    <div class="quiz-skeleton"></div>
+                </div>
+
+                <!-- Active Quiz Play Modal -->
+                <div class="quiz-overlay" id="quiz-play-modal">
+                    <div class="quiz-modal-container">
+                        <!-- Header -->
+                        <div class="quiz-modal-header">
+                            <div class="subj-badge">
+                                <span id="quiz-subj-icon">📐</span>
+                                <span id="quiz-subj-title">Matematika</span>
+                            </div>
+                            <button class="btn-close-modal" id="btn-quit-quiz"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+
+                        <!-- Progress indicator -->
+                        <div class="quiz-step-progress">
+                            <div class="quiz-step-fill" id="quiz-step-fill" style="width: 10%;"></div>
+                            <span id="quiz-step-txt">Savol: 1 / 10</span>
+                        </div>
+
+                        <!-- Question Area -->
+                        <div class="quiz-question-box">
+                            <p id="quiz-question-text">Loading question...</p>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="quiz-input-wrapper">
+                            <label for="quiz-user-answer">Sizning javobingiz:</label>
+                            <input type="text" id="quiz-user-answer" placeholder="Javobni yozing..." autocomplete="off">
+                            <span class="input-focus-line"></span>
+                        </div>
+
+                        <!-- Feedback Popups -->
+                        <div class="quiz-feedback-box" id="quiz-feedback-box">
+                            <!-- Populated in JS (correct/wrong) -->
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="quiz-actions">
+                            <button class="btn-primary-glow" id="btn-submit-answer">Javobni tekshirish <i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Results Report Screen -->
+                <div class="quiz-overlay" id="quiz-results-modal">
+                    <div class="quiz-results-container">
+                        <div class="results-header">
+                            <i class="fa-solid fa-trophy trophy-anim"></i>
+                            <h2>Natijangiz!</h2>
+                            <p>Viktorina yakunlandi. Mana sizning natijalaringiz:</p>
+                        </div>
+
+                        <div class="results-stats-card">
+                            <div class="res-stat-item border-green">
+                                <span class="res-val text-green" id="res-correct-cnt">0</span>
+                                <span class="res-lbl">To'g'ri</span>
+                            </div>
+                            <div class="res-stat-item border-red">
+                                <span class="res-val text-red" id="res-wrong-cnt">0</span>
+                                <span class="res-lbl">Xato</span>
+                            </div>
+                            <div class="res-stat-item border-gold">
+                                <span class="res-val text-gold" id="res-earned-val">+0</span>
+                                <span class="res-lbl">Yutuq (so'm)</span>
+                            </div>
+                        </div>
+
+                        <!-- Wrong Answers Log -->
+                        <div class="wrong-questions-log" id="wrong-questions-log-box" style="display: none;">
+                            <h4>Xato qilingan savollar ro'yxati:</h4>
+                            <ul class="wrong-list" id="wrong-questions-list">
+                                <!-- Populated dynamically -->
+                            </ul>
+                        </div>
+
+                        <div class="results-actions">
+                            <button class="btn-primary-glow" id="btn-restart-subject"><i class="fa-solid fa-rotate-left"></i> Qayta o'ynash</button>
+                            <button class="btn-secondary-glow" id="btn-exit-results"><i class="fa-solid fa-door-open"></i> Chiqish</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 3: WALLET -->
+            <section id="page-wallet" class="page-section">
+                <!-- Golden Glass Balance Card -->
+                <div class="wallet-balance-card">
+                    <div class="card-glass-glow"></div>
+                    <div class="balance-title-row">
+                        <span>Joriy Hamyon Balansi</span>
+                        <i class="fa-solid fa-wallet wallet-card-icon"></i>
+                    </div>
+                    <h1 class="wallet-main-val"><span id="wallet-balance">0</span> <small>so'm</small></h1>
+                    
+                    <div class="wallet-sub-row">
+                        <div class="w-sub-col">
+                            <span class="w-lbl">Jami topilgan</span>
+                            <span class="w-val" id="wallet-total-earned">0 so'm</span>
+                        </div>
+                        <div class="w-sub-col">
+                            <span class="w-lbl">To'g'ri javoblar</span>
+                            <span class="w-val" id="wallet-correct-answers">0 ta</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Form Card -->
+                <div class="wallet-form-card" id="withdraw-panel-card">
+                    <h3>Pul yechib olish</h3>
+                    <p class="panel-desc">Balansingiz 1000 so'mga yetganda pulingizni UzCard yoki Humo kartasiga yechib olishingiz mumkin.</p>
+                    
+                    <!-- Lock Indicator -->
+                    <div class="wallet-locked-banner" id="withdraw-locked-banner">
+                        <i class="fa-solid fa-lock text-gold"></i>
+                        <span>Balansingiz yetarli emas (Kamida <b>1,000 so'm</b> bo'lishi kerak)</span>
+                    </div>
+
+                    <!-- Interactive Form (hidden/disabled by default if balance < 1000) -->
+                    <form id="withdraw-form" style="display: none;" onsubmit="handleWithdrawal(event)">
+                        <div class="form-group">
+                            <label for="withdraw-fullname">Karta egasining to'liq ismi (F.I.SH):</label>
+                            <div class="input-icon-wrapper">
+                                <i class="fa-solid fa-user input-icon"></i>
+                                <input type="text" id="withdraw-fullname" placeholder="Masalan: Abdullayev Ali" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="withdraw-card">UzCard yoki Humo karta raqami (16 xonali):</label>
+                            <div class="input-icon-wrapper">
+                                <i class="fa-solid fa-credit-card input-icon"></i>
+                                <input type="text" id="withdraw-card" placeholder="8600 0000 0000 0000" maxlength="19" required>
+                            </div>
+                            <span class="input-hint">Karta raqami faqat 16 ta raqamdan iborat bo'lishi kerak.</span>
+                        </div>
+
+                        <button type="submit" class="btn-primary-glow btn-block" id="btn-withdraw-submit">
+                            Pulni yechishni so'rash <i class="fa-solid fa-circle-chevron-right"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Withdrawal History list -->
+                <div class="section-title-container">
+                    <h2>Yechish Tarixi</h2>
+                </div>
+                <div class="history-list" id="withdrawal-history-box">
+                    <div class="history-empty" id="history-empty-placeholder">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <p>Hozircha pul yechish so'rovlari mavjud emas.</p>
+                    </div>
+                    <ul class="history-ul" id="withdrawal-history-list" style="display: none;">
+                        <!-- Loaded dynamically -->
+                    </ul>
+                </div>
+            </section>
+
+            <!-- PAGE 4: PROFILE -->
+            <section id="page-profile" class="page-section">
+                <!-- Luxury Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-glow"></div>
+                    <div class="avatar-ring">
+                        <img src="/static/images/default-avatar.png" alt="Profile" class="profile-avatar" id="profile-avatar-img">
+                        <div class="verified-badge"><i class="fa-solid fa-circle-check"></i></div>
+                    </div>
+                    <h2 class="profile-name" id="profile-fullname">Developer Tester</h2>
+                    <span class="profile-username" id="profile-username-tag">@dev_quiz_tester</span>
+                    
+                    <div class="profile-membership-badge">
+                        <i class="fa-solid fa-crown text-gold"></i> Faol Foydalanuvchi
+                    </div>
+                </div>
+
+                <!-- Details Grid -->
+                <div class="profile-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-lbl"><i class="fa-solid fa-id-badge"></i> Telegram ID</span>
+                        <span class="detail-val" id="profile-tg-id">12345678</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl"><i class="fa-solid fa-phone"></i> Telefon raqam</span>
+                        <span class="detail-val text-green" id="profile-phone">+998 90 123 45 67</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl"><i class="fa-solid fa-calendar-days"></i> Ro'yxatdan o'tgan sana</span>
+                        <span class="detail-val" id="profile-join-date">Bugun</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-lbl"><i class="fa-solid fa-shield-halved"></i> Profil holati</span>
+                        <span class="detail-val text-cyan"><i class="fa-solid fa-circle-dot blink"></i> Tasdiqlangan</span>
+                    </div>
+                </div>
+
+                <!-- App Details Card -->
+                <div class="app-info-card">
+                    <h4>SMART QUIZ BOT haqida</h4>
+                    <p>Ushbu loyiha sizga o'z ustingizda ishlash, bilimlaringizni mustahkamlash va rag'batlantiruvchi mukofotlarga ega bo'lish imkoniyatini taqdim etadi.</p>
+                    <span class="app-version">Versiya 1.0.0 (Kurs Ishi)</span>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FLOATING AI ASSISTANT -->
+        <div class="ai-support-bubble" id="ai-support-trigger">
+            <div class="ai-pulse-ring"></div>
+            <i class="fa-solid fa-robot"></i>
+            <div class="ai-tooltip">
+                <span class="ai-tooltip-header">ASSALOMU ALEYKUM</span>
+                <span class="ai-tooltip-txt">QANDAY YORDAM KERAK?</span>
+            </div>
+        </div>
+
+        <!-- AI Chat Window overlay -->
+        <div class="ai-chat-window" id="ai-chat-window">
+            <!-- Header -->
+            <div class="ai-chat-header">
+                <div class="ai-title">
+                    <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="ai-status-col">
+                        <span class="ai-name">AI Yordamchi</span>
+                        <span class="ai-status"><i class="fa-solid fa-circle"></i> Onlayn ko'mak</span>
+                    </div>
+                </div>
+                <button class="btn-close-chat" id="btn-close-ai-chat"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Messages Log -->
+            <div class="ai-chat-body" id="ai-messages-container">
+                <div class="chat-msg bot-msg">
+                    <p>Assalomu alaykum! Men **Smart Quiz Bot**ning sun'iy intellektli yordamchisiman. Sizga qanday yordam bera olaman?</p>
+                    <span class="msg-time">Hozir</span>
+                </div>
+            </div>
+
+            <!-- Typing indicator inside chat -->
+            <div class="typing-indicator" id="ai-typing-indicator" style="display: none;">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Quick Reply Buttons -->
+            <div class="ai-quick-replies">
+                <button class="btn-quick-reply" onclick="askAiQuestion('about')">Bot haqida ma'lumot ℹ️</button>
+                <button class="btn-quick-reply" onclick="askAiQuestion('rules')">Viktorina qoidalari 📝</button>
+                <button class="btn-quick-reply" onclick="askAiQuestion('wallet')">Pul yechish tizimi 💳</button>
+                <button class="btn-quick-reply" onclick="askAiQuestion('profile')">Profilni sozlash 👤</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="app-nav">
+            <button class="nav-item active" onclick="switchTab('home')" id="nav-home">
+                <i class="fa-solid fa-house"></i>
+                <span>Asosiy</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('quizzes')" id="nav-quizzes">
+                <i class="fa-solid fa-lightbulb"></i>
+                <span>Viktorina</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('wallet')" id="nav-wallet">
+                <i class="fa-solid fa-wallet"></i>
+                <span>Hamyon</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('profile')" id="nav-profile">
+                <i class="fa-solid fa-user"></i>
+                <span>Profil</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Alert / Toast Notifications -->
+    <div class="toast-notification" id="toast-notification">
+        <i class="fa-solid fa-circle-info toast-icon" id="toast-icon"></i>
+        <span class="toast-message" id="toast-message">Xabar</span>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
