@@ -9,7 +9,7 @@ from config import BOT_TOKEN, CHANNEL_USERNAME, DEV_MODE, STATIC_DIR, PHOTOS_DIR
 bot = None
 if BOT_TOKEN:
     try:
-        bot = telebot.TeleBot(BOT_TOKEN, parse_mode="MARKDOWN")
+        bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
         print("[Bot] Telegram Bot initialized successfully.")
     except Exception as e:
         print(f"[Bot] Error initializing bot with provided token: {e}")
@@ -76,7 +76,7 @@ if bot:
             bot.send_message(
                 chat_id=message.chat.id,
                 text=(
-                    "⚠️ **Diqqat! Davom etish uchun kanalimizga a'zo bo'ling!**\n\n"
+                    "⚠️ <b>Diqqat! Davom etish uchun kanalimizga a'zo bo'ling!</b>\n\n"
                     f"Botdan to'liq foydalanish va pul ishlash uchun quyidagi rasmiy kanalimizga a'zo bo'lishingiz shart:\n\n"
                     f"👉 {CHANNEL_USERNAME}\n\n"
                     "A'zo bo'lgach, 'Tekshirish 🔄' tugmasini bosing."
@@ -99,7 +99,7 @@ if bot:
                 bot.edit_message_text(
                     chat_id=call.message.chat.id,
                     message_id=call.message.message_id,
-                    text="✅ **A'zolik muvaffaqiyatli tekshirildi!**"
+                    text="✅ <b>A'zolik muvaffaqiyatli tekshirildi!</b>"
                 )
             except Exception:
                 pass
@@ -165,15 +165,19 @@ if bot:
             photo_url=photo_url
         )
         
+        # Safe fallback in case database write returns None
+        first_name_db = user_db.get('first_name', message.from_user.first_name) if user_db else message.from_user.first_name
+        phone_number_db = user_db.get('phone_number', phone_number) if user_db else phone_number
+        
         bot.send_message(
             chat_id=message.chat.id,
             text=(
-                "🎉 **Hisobingiz muvaffaqiyatli ulandi!**\n\n"
-                f"Ism: **{user_db['first_name']}**\n"
-                f"Raqam: **{user_db['phone_number']}**\n\n"
+                "🎉 <b>Hisobingiz muvaffaqiyatli ulandi!</b>\n\n"
+                f"Ism: <b>{first_name_db}</b>\n"
+                f"Raqam: <b>{phone_number_db}</b>\n\n"
                 "Endi siz aqlli viktorinalarda qatnashib, haqiqiy pul topishga tayyorsiz! "
-                "Har bir to'g'ri javob uchun hisobingizga **10 so'm** qo'shiladi.\n\n"
-                "Pastdagi **'TESTNI BOSHLASH 🚀'** tugmasini bosing va o'yinni boshlang!"
+                "Har bir to'g'ri javob uchun hisobingizga <b>10 so'm</b> qo'shiladi.\n\n"
+                "Pastdagi <b>'TESTNI BOSHLASH 🚀'</b> tugmasini bosing va o'yinni boshlang!"
             ),
             reply_markup=get_webapp_keyboard()
         )
@@ -183,8 +187,8 @@ if bot:
         bot.send_message(
             chat_id=chat_id,
             text=(
-                f"👋 **Assalomu alaykum, {user_info.first_name}!**\n\n"
-                "**SMART QUIZ BOT**ga xush kelibsiz! Bu bot orqali siz turli fanlardan o'z bilmingizni sinab ko'rishingiz va pul ishlashingiz mumkin.\n\n"
+                f"👋 <b>Assalomu alaykum, {user_info.first_name}!</b>\n\n"
+                "<b>SMART QUIZ BOT</b>ga xush kelibsiz! Bu bot orqali siz turli fanlardan o'z bilmingizni sinab ko'rishingiz va pul ishlashingiz mumkin.\n\n"
                 "Botni faollashtirish uchun pastdagi tugmani bosib, telefon raqamingizni tasdiqlang. "
                 "Bu xavfsizlik va mukofotlarni yechib olish uchun talab qilinadi."
             ),
